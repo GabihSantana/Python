@@ -3,7 +3,9 @@ import textwrap
 def menu():
     menu = ("""
         >>>>>>> Selecione uma operação: <<<<<<<
-
+                [c] - Criar Conta Corrente
+                [u] - Usuário
+                [l] - Listar Conta
                 [d] - Depositar
                 [s] - Sacar 
                 [e] - Ver extrato
@@ -59,22 +61,85 @@ def sacar(*, saque, numero_saques, saque_limite, limite, extrato, saldo):
 
 def exibir_extrato(*, saldo, extrato):
     print("================= EXTRATO =================\n")
-    print("Não houve movimentações na conta bancária" if not extrato else extrato)
+    listar(conta)
+    print("------------------------")
+    print("\n\nNão houve movimentações na conta bancária" if not extrato else extrato)
     print(f"\n\nSALDO: R$ {saldo:.2f}")
     print("\n\n==============================================\n")
     
     return saldo, extrato
 
+def cadastro_usuario(usuario):
+    cpf = input("Informe seu CPF (somente os números): ")
+    usuarios = verificar_usuario(cpf, usuario)
+
+
+    if usuarios:
+        input("\nO CPF informado já pertence a um usuário! ")
+        return
+
+    else:
+        nome = input("Informe o nome completo: ")
+        data_nasc = input("Informe a data de Nascimento (dd-mm-aaaa): ")
+        end = print("Informe o endereço ")
+        log = input("Logradouro: ")
+        num = input("Número: ")
+        bai = input("Bairro: ")
+        cid = input("Cidade: ")
+        es = input("Estado: ")
+        end = log, num, bai, cid, es
+
+        usuario.append({"nome": nome, "data_nasc": data_nasc, "cpf": cpf, "end": end})
+        print("=== Usuário cadastrado com sucesso!===")
+
+def verificar_usuario(cpf, usuarios):
+    verificar_usuario = [usuario for usuario in usuarios if usuario["cpf"] == cpf]
+    return verificar_usuario[0] if verificar_usuario else None
+
+def conta_corrente(AG, numero_conta, usuario):
+    cpf = input("Informe o CPF (somente os números): ")
+    usuarios = verificar_usuario(cpf, usuario)
+
+    if usuarios:
+        print("\n === Conta criada com sucesso! === ")
+        return({"ag": AG, "nmr": numero_conta, "usuario": usuario})
+
+    print("\nUsuário não cadastrado - Criação de conta encerrada!")
+
+
+def listar(conta):
+    print("Agência:", conta["ag"])
+    print("C/C:", conta["nmr"])
+
+    for titular in conta["usuario"]:
+        print("Titular:", titular['nome'])
+
 saldo = 0
 extrato = ""
 numero_saques = 0
+usuario = [ ]
+conta = [ ]
+numero_conta = 1
 VALOR_LIMITE = 500
-LIMITE_SAQUE = 3    
+LIMITE_SAQUE = 3
+AG = "0001"
 
 while True:
     operacao = menu()
 
-    if operacao == 'd':
+    if operacao == "c":
+        conta = conta_corrente(AG, numero_conta, usuario)
+
+        if conta:
+            numero_conta = numero_conta + 1
+
+    elif operacao == 'l':
+        listar(conta)
+
+    elif operacao == 'u':
+        cadastro_usuario(usuario)
+
+    elif operacao == 'd':
         deposito = float(input("Valor do depósito: R$ "))
         saldo, extrato = depositar(deposito, saldo, extrato)
 
@@ -91,11 +156,11 @@ while True:
             )
 
     elif operacao == 'e':
-        exibir_extrato(saldo = saldo, extrato = extrato,)
+        exibir_extrato(saldo = saldo, extrato = extrato)
 
     elif operacao == 'x':
         print("Obrigado pela preferência!")
-        break;
+        break
     
     else:
         print("Operação não reconhecida!")
